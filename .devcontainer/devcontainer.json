@@ -1,0 +1,7 @@
+{
+  "name": "Friendly",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "forwardPorts": [3300],
+  "portsAttributes": { "3300": { "label": "Friendly", "visibility": "public" } },
+  "postStartCommand": "npm install && nohup npm start > /tmp/friendly.log 2>&1 &"
+}
