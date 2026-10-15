@@ -4,12 +4,12 @@ const app=express(),server=http.createServer(app),io=require('socket.io')(server
 const DATA_DIR=process.env.DATA_DIR||__dirname,UPL=path.join(DATA_DIR,'uploads');fs.mkdirSync(UPL,{recursive:true});
 const DBF=path.join(DATA_DIR,'data.json');
 let db=fs.existsSync(DBF)?JSON.parse(fs.readFileSync(DBF)):{users:[],sessions:{},chats:[],messages:[],posts:[],friends:[]};
+let saveT;const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>fs.writeFileSync(DBF,JSON.stringify(db)),200)};
+const id=()=>crypto.randomBytes(8).toString('hex');
 if(!db.users.length){const now=Date.now(),mk=(u,n,b)=>({id:id(),username:u,email:'',name:n,bio:b,avatar:'',pw:bcrypt.hashSync('Demo1234!',10),created:now});
   const a=mk('demo1','Demo One','First test account'),b=mk('demo2','Demo Two','Second test account');db.users.push(a,b);db.friends.push({from:a.id,to:b.id,accepted:true});
   const c={id:id(),group:false,members:[a.id,b.id]};db.chats.push(c);db.messages.push({id:id(),chat:c.id,from:b.id,ts:now,readBy:[],type:'text',text:'Hey! Welcome to Friendly 👋'});
   db.posts.push({id:id(),author:a.id,text:'Hello from Lagos! First post on Friendly 🎉',image:'',ts:now,likes:[b.id],comments:[]});fs.writeFileSync(DBF,JSON.stringify(db));console.log('Seeded demo accounts');}
-let saveT;const save=()=>{clearTimeout(saveT);saveT=setTimeout(()=>fs.writeFileSync(DBF,JSON.stringify(db)),200)};
-const id=()=>crypto.randomBytes(8).toString('hex');
 const pub=u=>u&&({id:u.id,username:u.username,name:u.name,bio:u.bio||'',avatar:u.avatar||''});
 const up=multer({storage:multer.diskStorage({destination:UPL,filename:(r,f,cb)=>cb(null,id()+path.extname(f.originalname||'').slice(0,6))}),limits:{fileSize:15e6}});
 app.use(express.json());app.use(cookieParser());
